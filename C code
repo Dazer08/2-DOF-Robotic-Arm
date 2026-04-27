@@ -1,0 +1,74 @@
+#include <Servo.h>
+Servo baseServo, shoulderServo, elbowServo, clawServo;
+
+int base_pos = 0;
+int shoulder_pos = 135;
+int elbow_pos = 65;
+int claw_pos = 0;
+
+int base_angle = 0;
+int shoulder_angle = 0;
+int elbow_angle = 0;
+int claw_angle = 0;
+
+unsigned long clawDelayStart = 0;
+bool clawDelayActive = false;
+
+void setup() {
+  Serial.begin(9600);
+
+  baseServo.attach(2);
+  shoulderServo.attach(4);
+  elbowServo.attach(6);
+  clawServo.attach(8);
+
+  baseServo.write(base_pos);
+  shoulderServo.write(shoulder_pos);
+  elbowServo.write(elbow_pos);
+  clawServo.write(claw_pos);
+
+  delay(2000);
+}
+
+void loop() {
+
+  if (Serial.available() >= 4) {
+    base_angle = Serial.read();
+    shoulder_angle = Serial.read();
+    elbow_angle = Serial.read();
+    claw_angle = Serial.read();
+
+    
+    clawDelayStart = millis();
+    clawDelayActive = true;
+  }
+
+  
+  base_pos = moveToward(base_pos, base_angle);
+  shoulder_pos = moveToward(shoulder_pos, shoulder_angle);
+  elbow_pos = moveToward(elbow_pos, elbow_angle);
+
+  
+  if (clawDelayActive && millis() - clawDelayStart >= 4000) {
+    clawDelayActive = false;
+  }
+
+  if (!clawDelayActive) {
+    claw_pos = moveToward(claw_pos, claw_angle);
+  }
+
+  
+  baseServo.write(base_pos);
+  shoulderServo.write(shoulder_pos);
+  elbowServo.write(elbow_pos);
+  clawServo.write(claw_pos);
+
+  delay(15); 
+}
+
+
+int moveToward(int current, int target) {
+  if (current < target) return current + 1;
+  if (current > target) return current - 1;
+  return current;
+}
