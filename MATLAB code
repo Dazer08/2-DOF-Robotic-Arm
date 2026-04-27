@@ -1,0 +1,11 @@
+clear all
+base = 0;
+shoulder = 90;
+elbow = 90;
+claw = 0;
+
+s = serialport("COM3", 9600);  
+pause(2); 
+
+write(s, [base, shoulder, elbow, claw], "uint8");
+fprintf("Sent to Arduino: Base=%d, Shoulder=%d, Elbow=%d, Claw=%d\n", base, shoulder, elbow, claw);
